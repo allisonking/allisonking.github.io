@@ -4,6 +4,24 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
+$("#engineering_button").click(function() {
+    $('html, body').animate({
+        scrollTop: $("#engineering").offset().top
+    }, 700);
+});
+
+$("#hyphen_button").click(function() {
+	$('html, body').animate({
+		scrollTop: $("#hyphen").offset().top
+	}, 700);
+});
+
+$("#writing_button").click(function() {
+	$('html, body').animate({
+		scrollTop: $("#writing").offset().top
+	}, 700);
+});
+
 (function($) {
 
 	var settings = {
@@ -114,9 +132,10 @@
 			// Lightbox gallery.
 				$window.on('load', function() {
 
-					$('#two').poptrox({
+					$('.popUpSection').poptrox({
 						caption: function($a) { return $a.next('h3').text(); },
-						overlayColor: '#2c2c2c',
+            //captionText: $.parseHTML(i.attr('title')),
+						//overlayColor: '#2c2c2c',
 						overlayOpacity: 0.85,
 						popupCloserText: '',
 						popupLoaderText: '',
@@ -127,6 +146,10 @@
 						usePopupNav: true,
 						windowMargin: (skel.breakpoint('small').active ? 0 : 50)
 					});
+
+					$('#ereaderPopUp').poptrox({
+						caption: "asdf"
+					})
 
 				});
 
