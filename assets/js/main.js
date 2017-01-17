@@ -147,9 +147,6 @@ $("#writing_button").click(function() {
 						windowMargin: (skel.breakpoint('small').active ? 0 : 50)
 					});
 
-					$('#ereaderPopUp').poptrox({
-						caption: "asdf"
-					})
 
 				});
 
