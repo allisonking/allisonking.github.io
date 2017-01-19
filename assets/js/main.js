@@ -4,24 +4,6 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
-$("#engineering_button").click(function() {
-    $('html, body').animate({
-        scrollTop: $("#engineering").offset().top
-    }, 700);
-});
-
-$("#hyphen_button").click(function() {
-	$('html, body').animate({
-		scrollTop: $("#hyphen").offset().top
-	}, 700);
-});
-
-$("#writing_button").click(function() {
-	$('html, body').animate({
-		scrollTop: $("#writing").offset().top
-	}, 700);
-});
-
 (function($) {
 
 	var settings = {
