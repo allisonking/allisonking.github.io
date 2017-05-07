@@ -1994,7 +1994,7 @@
 			-webkit-transition: opacity 0.2s ease-in-out;
 			-ms-transition: opacity 0.2s ease-in-out;
 			transition: opacity 0.2s ease-in-out;
-			background: url("images/overlay.png");
+			/*background: url("images/overlay.png");*/
 			border-radius: 0.35em;
 			content: '';
 			display: block;
@@ -2004,6 +2004,10 @@
 			position: absolute;
 			top: 0;
 			width: 100%;
+		}
+
+		.overlay:before {
+			background: url("images/overlay.png");
 		}
 
 		.image.thumb {
@@ -2032,6 +2036,13 @@
 				text-decoration: none;
 				top: 50%;
 				white-space: nowrap;
+			}
+			.site-item .image.thumb:after {
+				content: 'View Site';
+			}
+			.presentation-item .image.thumb:after {
+				content: 'View Presentation';
+				margin: -1.25em 0 0 -5em;
 			}
 
 			.image.thumb:hover:after {

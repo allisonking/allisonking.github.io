@@ -442,6 +442,8 @@
 		}
 	}
 
+
+
 /* Image */
 
 	.image {
@@ -546,6 +548,14 @@
 			img {
 				border-radius: 100%;
 				width: 100%;
+			}
+		}
+	}
+
+	.site-item {
+		&.thumb {
+			&.after {
+				content: 'View Site';
 			}
 		}
 	}
