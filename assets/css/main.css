@@ -3138,3 +3138,10 @@
 			}
 
 	}
+
+	.white-link {
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 0.9em;
+		margin: 1em 0 0 0;
+		padding: 0;
+	}
