@@ -2405,6 +2405,16 @@
 			font-size: 0.8em;
 		}
 
+		input[type="submit"].xsmall,
+		input[type="reset"].xsmall,
+		input[type="button"].xsmall,
+		.button.xsmall {
+			font-size: 0.6em;
+			min-width: 0;
+			height: calc(2em + 6px);
+			line-height: 2em;
+		}
+
 		input[type="submit"].big,
 		input[type="reset"].big,
 		input[type="button"].big,
