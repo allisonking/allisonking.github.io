@@ -2044,6 +2044,10 @@
 				content: 'View Presentation';
 				margin: -1.25em 0 0 -5em;
 			}
+			.blog-item .image.thumb:after {
+				content: 'View Write-up';
+				margin: -1.25em 0 0 -5em;
+			}
 
 			.image.thumb:hover:after {
 				opacity: 1.0;
