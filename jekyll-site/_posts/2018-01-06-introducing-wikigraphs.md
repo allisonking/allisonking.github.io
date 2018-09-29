@@ -2,10 +2,15 @@
 published: true
 layout: post
 title: Introducing Wikigraphs
+excerpt: "<p><b>Update (1/24/2018):</b> This is now deployed on <a href='https://wikigraphs.herokuapp.com/'> Heroku!</a></p>
+
+<p>For the past few weeks, I have been working on a project that I am currently calling Wikigraphs. What in the world is that, you ask? Well, thanks for asking! If I had to summarize it, I'd say it is a framework that allows for community driven data as input into data driven graphs, thereby allowing for transparent data sources.</p>
+
+<p>Let's break that down.</p>
+"
+image_url: images/thumbs/wikigraph.png
 ---
 **Update (1/24/2018):** This is now deployed on [Heroku!](https://wikigraphs.herokuapp.com/)
-
-------------
 
 For the past few weeks, I have been working on a project that I am currently calling Wikigraphs. What in the world is that, you ask? Well, thanks for asking! If I had to summarize it, I'd say it is a framework that allows for community driven data as input into data driven graphs, thereby allowing for transparent data sources.
 

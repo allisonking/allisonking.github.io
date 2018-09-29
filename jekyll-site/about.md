@@ -4,15 +4,6 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+Hi there— thanks for stopping by!
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
-
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll
+I'm Allison, currently a software engineer at [Cortico](https://www.cortico.ai) and previously at [MIT Lincoln Laboratory](https://ll.mit.edu). On this site, you'll find my occasional blog, and also a collection of what I have done either in school or outside of work just for fun. I am an engineer by day and a writer by night and am currently interested in exploring the space between the two, as well as in investigating how technology can lend a voice to traditionally silenced communities.
