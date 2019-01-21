@@ -8,7 +8,7 @@ excerpt: "<p><b>Update (1/24/2018):</b> This is now deployed on <a href='https:/
 
 <p>Let's break that down.</p>
 "
-image_url: images/thumbs/wikigraph.png
+image_url: /images/thumbs/wikigraph.png
 ---
 **Update (1/24/2018):** This is now deployed on [Heroku!](https://wikigraphs.herokuapp.com/)
 
