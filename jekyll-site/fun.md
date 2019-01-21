@@ -13,12 +13,12 @@ Here you'll find samples of my work as an engineer, a storyteller, and something
 <a href="#hyphen"> -- </a>
 <a href="#Writing"> Writing </a> -->
 {% for type in page.types %}
-  <a href="#{{type}}">{{type}} </a>
+  <a href="#{{type | remove: " "}}">{{type}} </a>
 {% endfor %}
 
 
 {% for type in page.types %}
- <h2 class="portfolio-heading" id="{{type}}"> {{type}} </h2>
+ <h2 class="portfolio-heading" id="{{type | remove: " "}}"> {{type}} </h2>
  {% for portfolio in site.portfolio %}
  {% if portfolio.type == type %}
  <div class='post-wrapper'>
