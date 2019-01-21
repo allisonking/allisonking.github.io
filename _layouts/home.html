@@ -1,0 +1,49 @@
+---
+layout: default
+---
+
+<div class="home">
+  {%- if page.title -%}
+    <h1 class="page-heading">{{ page.title }}</h1>
+  {%- endif -%}
+
+  {{ content }}
+
+  {%- if site.posts.size > 0 -%}
+    <h2 class="post-list-heading">{{ page.list_title | escape }}</h2>
+    <ul class="post-list">
+      {%- for post in site.posts -%}
+      <li>
+        <div class='post-wrapper'>
+          {%- if post.image_url -%}
+          <div class='post-image'>
+              <img src={{ post.image_url }}/>
+          </div>
+          {%- endif -%}
+          <div class='post-content'>
+            {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+            <span class="post-meta">{{ post.date | date: date_format }}</span>
+            <h3>
+              <a class="post-link" href="{% if post.ext_url %} {{ post.ext_url }} {% else %} {{ post.url | relative_url }} {% endif %}" {% if post.ext_url %}target="_blank"{% endif %}>
+                {{ post.title | escape }}
+                {%- if post.ext_url -%}
+                <span class="external-link"><i class="fas fa-external-link-alt"></i></span>
+                {%- endif -%}
+              </a>
+
+            </h3>
+            {%- if site.show_excerpts -%}
+            {{ post.excerpt }}
+            {%- endif -%}
+
+          </div>
+        </div>
+
+
+      </li>
+      <br><br>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+</div>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Introducing Wikigraphs | Allison King</title>
+<meta name="generator" content="Jekyll v3.8.4" />
+<meta property="og:title" content="Introducing Wikigraphs" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Update (1/24/2018): This is now deployed on Heroku! For the past few weeks, I have been working on a project that I am currently calling Wikigraphs. What in the world is that, you ask? Well, thanks for asking! If I had to summarize it, I&#39;d say it is a framework that allows for community driven data as input into data driven graphs, thereby allowing for transparent data sources. Let&#39;s break that down." />
+<meta property="og:description" content="Update (1/24/2018): This is now deployed on Heroku! For the past few weeks, I have been working on a project that I am currently calling Wikigraphs. What in the world is that, you ask? Well, thanks for asking! If I had to summarize it, I&#39;d say it is a framework that allows for community driven data as input into data driven graphs, thereby allowing for transparent data sources. Let&#39;s break that down." />
+<link rel="canonical" href="http://localhost:4000/2018/01/06/introducing-wikigraphs.html" />
+<meta property="og:url" content="http://localhost:4000/2018/01/06/introducing-wikigraphs.html" />
+<meta property="og:site_name" content="Allison King" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-01-06T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"Update (1/24/2018): This is now deployed on Heroku! For the past few weeks, I have been working on a project that I am currently calling Wikigraphs. What in the world is that, you ask? Well, thanks for asking! If I had to summarize it, I&#39;d say it is a framework that allows for community driven data as input into data driven graphs, thereby allowing for transparent data sources. Let&#39;s break that down.","@type":"BlogPosting","url":"http://localhost:4000/2018/01/06/introducing-wikigraphs.html","headline":"Introducing Wikigraphs","dateModified":"2018-01-06T00:00:00-05:00","datePublished":"2018-01-06T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2018/01/06/introducing-wikigraphs.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Allison King" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Allison King</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/fun/">Fun</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Introducing Wikigraphs</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2018-01-06T00:00:00-05:00" itemprop="datePublished">Jan 6, 2018
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p><strong>Update (1/24/2018):</strong> This is now deployed on <a href="https://wikigraphs.herokuapp.com/">Heroku!</a></p>
+
+<p>For the past few weeks, I have been working on a project that I am currently calling Wikigraphs. What in the world is that, you ask? Well, thanks for asking! If I had to summarize it, I’d say it is a framework that allows for community driven data as input into data driven graphs, thereby allowing for transparent data sources.</p>
+
+<p>Let’s break that down.</p>
+
+<h2 id="the-data-driven-graph">The Data Driven Graph</h2>
+<p>There are a lot of great data driven graphs out there. D3js, the popular JavaScript library, stands for Data Driven Documents, after all, and powers many of those awesome <em>New York Times</em> visualizations. These polished graphs are easily interpreted as objective and authoritative– after all, data does not lie, right? But data can omit and misrepresent, and when that is put into a nice graph it’s easy to forget that everything might not be there.</p>
+
+<p><a href="https://www.nytimes.com/interactive/2015/03/19/upshot/3d-yield-curve-economic-growth.html"><img src="http://iibawards-prod.s3.amazonaws.com/app/public/ckeditor_assets/pictures/218/content_screen_shot_2015-12-10_at_01_06_30.png" alt="NYT visualization example" /></a></p>
+
+<p>I mean, look at that graph! The first thing that I’m thinking is definitely not “Hm, I wonder if the data behind this graph is representative of everything.” Much more likely, the first thing I’m thinking is, “Yes, do take me on this visual tour of economic growth!” There is an implicit trust in the graph maker, who spent so long making such a beautiful graph, that their data is accurate as well.</p>
+
+<p>This becomes dangerous knowing that data, the fundamental unit on which these graphs rely on, can be skewed. Take, for example, the data on sexual assault on college campuses. If this data were graphed, it would appear that certain schools have a very high rate of sexual assault while others have none. Looking at a graph like this, it’s easy to conclude that sexual assault only happens at these crazy schools, but not at the schools that have zero reported incidents. In reality, the reporting rate corresponds more to the school environment and whether or not it is a space <a href="https://www.theatlantic.com/education/archive/2016/01/why-the-prevalence-of-campus-sexual-assault-is-so-hard-to-quantify/427002/">where people can feel comfortable reporting</a>. So how do we work towards making sure our data does not exclude voices?</p>
+
+<h2 id="community-driven-data">Community Driven Data</h2>
+<p>The best example of community driven data is probably Wikipedia. Consider this excerpt:</p>
+
+<blockquote>
+  <p>“Comparing the shifting of authority from the <em>Encyclopedia Britannica</em> to Wikipedia– an authoritative collection of experts vs a self-organizing community of bookworms for the common good– is a great indicator of this phase change. In 2005, <em>Nature</em> published a study that revealed that the two were comparable in quality. Since then, we have witnessed the steady ascension of Wikipedia. Capable not only of instantly responding to new information (a celebrity’s death, the onset of hostilities between two rival factions) but fostering dissent, deliberation, and ultimately consensus on how that information should be presented.” – <em>Whiplash: How to Survive Our Future Faster</em>, by Joi Ito and Jeff Howe</p>
+</blockquote>
+
+<p>So even though anybody can edit Wikipedia, eventually, and sometimes after lengthy edit wars, the information that ends up on the site is often as accurate as an encyclopedia entry written by experts. And since <em>anybody</em> can edit Wikipedia, this seems like a start for how to capture data that might not otherwise be represented.</p>
+
+<h1 id="back-to-wikigraphs">Back to Wikigraphs</h1>
+<p>As the name suggests, the idea of wikigraphs is a combination of Wikipedia’s data collection model with data driven graphs.</p>
+
+<h2 id="an-example">An Example</h2>
+<p>Recently, I decided that I wanted to do some sort of data visualization on Asian American authors, and maybe something about the coverage they get from the media. The easiest data source to start from seemed to be the <a href="https://developer.nytimes.com/books_api.json">New York Times Books API</a>, which lets you get a list of book reviews they have done for books by a given author. Great! The next step, then, was to get a list of Asian American authors.</p>
+
+<p>What does it mean to be an Asian American author? That’s not an easy question to answer, and any answer that I gave alone would not cover everybody’s definition. And of course, I, as one person, simply don’t know all of the Asian American authors out there! I came up with what I saw as an initial list with the intent that the list could be modified in the future, possibly by other people.</p>
+
+<h3 id="first-a-graph">First, a graph</h3>
+<p>I decided to make a graph that showed the number of reviews a given author has gotten from the NYT, as well as the ability to see a timeline of when these reviews were published.
+<img src="https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/shift_data.gif" alt="graph example" /></p>
+
+<p>There’s some additional functionality as well– you can hover on points to see the book that was reviewed, who reviewed it, and clicking on the circle redirects you to the actual review. This data was gathered by first compiling a list of names, then querying the NYT API for the data, which was stored as a JSON and read in by D3. It’s easy to stop here, with a reasonable looking graph with a good amount of interactivity, but the data is incomplete.</p>
+
+<h3 id="next-user-input">Next, user input</h3>
+<p>The pipeline so far looks like this:
+<img src="https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/pipeline_1.png" alt="first pipeline" /></p>
+
+<p>What we want though, is something more like this:
+<img src="https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/pipeline_2.png" alt="second pipelines" /></p>
+
+<p>So what if we could let people reading the graph alter the underlying data if they see something missing or incorrect? To trust unknown people to gather data and do so correctly may seem risky, but we have seen that it can succeed in Wikipedia.</p>
+
+<p>In order to accommodate data changes, I added a database and server side code (in the form of MongoDB and Flask since they are both minimal and quick to implement, with MongoDB not needing a database schema and Flask being a microframework). To the front end, I added the ability to query the NYT API dynamically given a user input, as well as the ability to remove an author.
+<img src="https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/add_delete.gif" alt="second pipelines" /></p>
+
+<p>With the database in place, all user modifications are now saved and logged.</p>
+
+<h2 id="concluding-thoughts">Concluding Thoughts</h2>
+<p>Wikigraphs is a proof of concept of how user discussion/discourse may lead to more representative graphs. There are still questions outstanding as well as improvements that could be made:</p>
+<ul>
+  <li>Displaying user activity, i.e. when authors are added or removed, to the side, or on a separate page, may be useful, if only to remind readers that the data should not be trusted without second thought</li>
+  <li>Adding a database and server side code is a non-trivial task. Could a tool be developed to make this all easier? Hosting the data in a cloud environment meant for this kind of data manipulation, for example?</li>
+  <li>The example model trusts the NYT API as a source to reliably return the reviews for a given author. If there were a bug in the API, or if the database somehow missed out on some sources, this would not be reliable, and perhaps this part, too, could also be editable by users</li>
+  <li>What about just using Wikipedia for data? Certainly easier than setting up another framework, but I see a difference between a link that says ‘data from ___ Wikipedia page’, where a user might not think to go edit that page, and actually being prompted by the graph itself to edit the underlying data</li>
+</ul>
+
+<p>Finally, an acknowledgment– a lot of this line of thinking was inspired by the article <a href="https://civic.mit.edu/feminist-data-visualization"><em>What Would Feminist Data Visualization Look Like?</em></a> by Catherine D’Ignazio, so super thanks to her work.</p>
+
+<p>Thanks for reading! I still need to actually go out and make this project hosted somewhere, so stay tuned! In the meantime, <a href="https://github.com/allisonking/wiki-graphs/tree/readme">here’s the repository</a>.</p>
+
+  </div><a class="u-url" href="/2018/01/06/introducing-wikigraphs.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Allison King</li><li><a class="u-email" href="mailto:allisonjuliaking@gmail.com">allisonjuliaking@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/allisonking"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">allisonking</span></a></li><li><a href="https://www.twitter.com/allisonjking"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">allisonjking</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Software Engineer | Reader | Writer</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

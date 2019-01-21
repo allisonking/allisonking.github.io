@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Real time visualizations with D3 | Allison King</title>
+<meta name="generator" content="Jekyll v3.8.4" />
+<meta property="og:title" content="Real time visualizations with D3" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A while back, I did some visualizations on Harry Potter fan fiction, scraped from FanFiction.net. To do this, I built a web scraper in Python, saved off the data as one huge CSV file, and had my visualizations pull from bits and pieces of this data file. While this worked well for the data that I had, I found myself wishing that the data could be updated and that I could see in real time when fan fictions were being published. Even though it has been years since a Harry Potter book came out, in my scraping adventures, I found that people were still publishing their writing every hour or so! With the method I used, all of my data stopped on the day I happened to scrape it. How would I go about being able to continuously show updated data?" />
+<meta property="og:description" content="A while back, I did some visualizations on Harry Potter fan fiction, scraped from FanFiction.net. To do this, I built a web scraper in Python, saved off the data as one huge CSV file, and had my visualizations pull from bits and pieces of this data file. While this worked well for the data that I had, I found myself wishing that the data could be updated and that I could see in real time when fan fictions were being published. Even though it has been years since a Harry Potter book came out, in my scraping adventures, I found that people were still publishing their writing every hour or so! With the method I used, all of my data stopped on the day I happened to scrape it. How would I go about being able to continuously show updated data?" />
+<link rel="canonical" href="http://localhost:4000/2018/02/19/D3-with-websockets-tutorial.html" />
+<meta property="og:url" content="http://localhost:4000/2018/02/19/D3-with-websockets-tutorial.html" />
+<meta property="og:site_name" content="Allison King" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-02-19T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"A while back, I did some visualizations on Harry Potter fan fiction, scraped from FanFiction.net. To do this, I built a web scraper in Python, saved off the data as one huge CSV file, and had my visualizations pull from bits and pieces of this data file. While this worked well for the data that I had, I found myself wishing that the data could be updated and that I could see in real time when fan fictions were being published. Even though it has been years since a Harry Potter book came out, in my scraping adventures, I found that people were still publishing their writing every hour or so! With the method I used, all of my data stopped on the day I happened to scrape it. How would I go about being able to continuously show updated data?","@type":"BlogPosting","url":"http://localhost:4000/2018/02/19/D3-with-websockets-tutorial.html","headline":"Real time visualizations with D3","dateModified":"2018-02-19T00:00:00-05:00","datePublished":"2018-02-19T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2018/02/19/D3-with-websockets-tutorial.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Allison King" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Allison King</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/fun/">Fun</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Real time visualizations with D3</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2018-02-19T00:00:00-05:00" itemprop="datePublished">Feb 19, 2018
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>A while back, I did <a href="http://allisonking.github.io/fanfic-analysis">some visualizations</a> on Harry Potter fan fiction, scraped from <a href="https://www.fanfiction.net">FanFiction.net</a>. To do this, I built a web scraper in Python, saved off the data as one huge CSV file, and had my visualizations pull from bits and pieces of this data file.</p>
+
+<p>While this worked well for the data that I had, I found myself wishing that the data could be updated and that I could see in real time when fan fictions were being published. Even though it has been years since a Harry Potter book came out, in my scraping adventures, I found that people were still publishing their writing every hour or so! With the method I used, all of my data stopped on the day I happened to scrape it. How would I go about being able to continuously show updated data?</p>
+
+<h2 id="websockets">Websockets</h2>
+<p>It turns out a good way to show updated data is through websockets. Before websockets, the way to continuously gather information would be to do long polling of HTTP requests. So I would set my code to scrape FanFiction.net every minute or so. However, with websockets, I only need to ask for a connection to FanFiction.net once, and that connection sticks around, so any time there is an update from FanFiction.net, I get it immediately, as opposed to after the next time I happen to send out an HTTP request. Neat!</p>
+
+<p>So how do you make visualizations in D3 that utilize websockets in order to get real time updates? I put together this tutorial to show an example of how it can be done. Onwards!</p>
+
+<h1 id="the-tutorial">The Tutorial</h1>
+<p>Time to have some fun! We are going to use <a href="https://docs.gdax.com/#websocket-feed">GDAX’s websocket feed</a> as our source data, both because it was one of the few public websocket APIs I could find, and because cryptocurrency seems to be all the rage these days. GDAX is a a website that allows trading of cryptocurrency. Now before you put your trust in me that we’ll be having fun and making a cool real time visualization, you probably want to see an end result. <a href="https://bl.ocks.org/allisonking/83e870c24f5031e9a6abe3719bf66032">Check it out!</a></p>
+
+<p>What’s going on here?</p>
+<ul>
+  <li>Live data from the GDAX website of Ethereum transactions</li>
+  <li>Visualized with D3.js, featuring:
+    <ul>
+      <li>Scrolling to pop off older data as we get newer data</li>
+      <li>Automatic axes adjustment as data comes in</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+  <li>A web browser capable of supporting web sockets. Check out <a href="https://www.websocket.org/echo.html">this site</a> which will tell you whether or not your browser supports websockets!</li>
+  <li>A local web server– I use <code class="highlighter-rouge">http-server</code>. See <a href="https://github.com/d3/d3/wiki#local-development">the D3 wiki</a> for how to use/install.</li>
+  <li>A text editor</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+<p>Alright, we are ready to go! There will be two examples we will rely heavily on to get started:</p>
+<ul>
+  <li>Mike Bostock’s <a href="https://bl.ocks.org/mbostock/1642989">Spline Transition</a> block</li>
+  <li>Websocket.org’s <a href="https://www.websocket.org/echo.html">Echo example</a></li>
+</ul>
+
+<p>Spline Transition is part of a series of blocks on real time visualization that can be found <a href="https://bost.ocks.org/mike/path/">here</a>. The example uses randomly generated numbers, constrained to a certain range (a normal curve centered on 0 with standard deviation of 0.2) that get added every ‘tick’. Because the randomly generated numbers are constrained in this example, there’s no need to update axes. But we’ll be using pretty unpredictable data (who knows what’s going on in that crazy cryptocurrency market?) so we’ll need an adjusting axis, and since we aren’t just randomly generating data and are pulling it from a real source, we’ll use websockets to get the data in real time.</p>
+
+<p>The echo example is a good reference for how to connect to a websocket, send and receive messages, and close a websocket. We’ll use this as a reference.</p>
+
+<p>Alright! Go ahead and download Spline Transition’s <code class="highlighter-rouge">index.html</code>. The easiest way to download this is probably to either copy and paste from the block, or go to <a href="https://gist.github.com/mbostock/1642989">the gist</a> and download the raw <code class="highlighter-rouge">index.html</code>.</p>
+
+<h2 id="understanding-the-code">Understanding the code</h2>
+<p>In this section, we will simply go over the lines of code, what they do, and I’ll say a bit how we will change them, though we will save the action of actually changing the lines for the next section. We’ll leave the CSS and HTML as is, and focus only on the JavaScript portions, the portions in between the <code class="highlighter-rouge">&lt;script&gt; &lt;/script&gt;</code> tags.</p>
+
+<p>Let’s start with the first three lines of JavaScript.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">n</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+    <span class="nx">random</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">randomNormal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">.</span><span class="mi">2</span><span class="p">),</span>
+    <span class="nx">data</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">range</span><span class="p">(</span><span class="nx">n</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="nx">random</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">n</code> is the number of data points that will be shown on the x axis– with new data coming in, we need to pop off the older values whenever we exceed <code class="highlighter-rouge">n</code>. We’ll keep <code class="highlighter-rouge">n</code> at 40 in this tutorial, but feel free to adjust as you want. We won’t be using <code class="highlighter-rouge">random</code>, but this is a function that generates a random number that would fit a normal distribution of (median, standard deviation). Finally, we have our ever important data! This line says essentially says ‘give me <code class="highlighter-rouge">n</code> random values’, where <code class="highlighter-rouge">n</code> is 40 in our case, and <code class="highlighter-rouge">random</code> is the function we just defined in the line above. We won’t start with any data and will instead just start with an empty array since all of our data will be from websockets.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">svg</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">"svg"</span><span class="p">),</span>
+    <span class="nx">margin</span> <span class="o">=</span> <span class="p">{</span><span class="na">top</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="na">right</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="na">bottom</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="na">left</span><span class="p">:</span> <span class="mi">40</span><span class="p">},</span>
+    <span class="nx">width</span> <span class="o">=</span> <span class="o">+</span><span class="nx">svg</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"width"</span><span class="p">)</span> <span class="o">-</span> <span class="nx">margin</span><span class="p">.</span><span class="nx">left</span> <span class="o">-</span> <span class="nx">margin</span><span class="p">.</span><span class="nx">right</span><span class="p">,</span>
+    <span class="nx">height</span> <span class="o">=</span> <span class="o">+</span><span class="nx">svg</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"height"</span><span class="p">)</span> <span class="o">-</span> <span class="nx">margin</span><span class="p">.</span><span class="nx">top</span> <span class="o">-</span> <span class="nx">margin</span><span class="p">.</span><span class="nx">bottom</span><span class="p">,</span>
+    <span class="nx">g</span> <span class="o">=</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"transform"</span><span class="p">,</span> <span class="s2">"translate("</span> <span class="o">+</span> <span class="nx">margin</span><span class="p">.</span><span class="nx">left</span> <span class="o">+</span> <span class="s2">","</span> <span class="o">+</span> <span class="nx">margin</span><span class="p">.</span><span class="nx">top</span> <span class="o">+</span> <span class="s2">")"</span><span class="p">);</span>
+</code></pre></div></div>
+<p>This is standard SVG and D3 code to get the SVG object from the HTML, to get the dimensions, and to make a group that we can append all of our SVG elements to.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">scaleLinear</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">domain</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="nx">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="p">.</span><span class="nx">range</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="nx">width</span><span class="p">]);</span>
+
+<span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">scaleLinear</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">domain</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="p">.</span><span class="nx">range</span><span class="p">([</span><span class="nx">height</span><span class="p">,</span> <span class="mi">0</span><span class="p">]);</span>
+</code></pre></div></div>
+<p>Here, the range and domain of our x and y scales are set. The x scale is straightforward and we will not be changing it– we want the range to be the width of our SVG, and we want the domain to be the number of data points that we will have. Minus two. I believe that’s to keep the data looking like it is moving while it comes in.</p>
+
+<p>The range for our y scale will be the same (the height of our SVG), but our domain will not be -1 to 1, because if it were, I think a lot of people would be very worried about their cryptocurrency portfolios! We won’t know what this domain will until we start getting data in.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">line</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">line</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">curve</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">curveBasis</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span> <span class="p">})</span>
+    <span class="p">.</span><span class="nx">y</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">y</span><span class="p">(</span><span class="nx">d</span><span class="p">);</span> <span class="p">});</span>
+</code></pre></div></div>
+
+<p>This is another function, called <code class="highlighter-rouge">line</code> that will draw a D3 line based on x and y values. We won’t be changing this.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"defs"</span><span class="p">).</span><span class="nx">append</span><span class="p">(</span><span class="s2">"clipPath"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"clip"</span><span class="p">)</span>
+  <span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"rect"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"width"</span><span class="p">,</span> <span class="nx">width</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"height"</span><span class="p">,</span> <span class="nx">height</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Ah, a clip path! This says that anything outside of this rectangle will be clipped off and won’t be shown. Why do we need this? Because we have a line which will be moving to x values that aren’t in the chart, and we want everything to look like it’s staying within the axes. Clip paths can be used for implementing zooming as well, where if you don’t have them, you end up with data points outside your x and y axes!</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="s2">"axis axis--x"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"transform"</span><span class="p">,</span> <span class="s2">"translate(0,"</span> <span class="o">+</span> <span class="nx">y</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s2">")"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">axisBottom</span><span class="p">(</span><span class="nx">x</span><span class="p">));</span>
+<span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="s2">"axis axis--y"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">axisLeft</span><span class="p">(</span><span class="nx">y</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>Here, we make the actual axis SVG element for both the x and y axes. D3 has some magic for axes. In this case, all we need to do is pass in the scales we defined earlier. <code class="highlighter-rouge">d3.axisBottom()</code> puts the axis at the bottom of the scale, and <code class="highlighter-rouge">d3.axisLeft()</code> puts it at– you guessed it!– the leftmost position of the scale. This example transforms the x axis up to the middle so that we get more of a T shaped graph. I like the x axis at the very bottom for the graph that we will be making, but it’s up to you how to show off your data.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"clip-path"</span><span class="p">,</span> <span class="s2">"url(#clip)"</span><span class="p">)</span>
+  <span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"path"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="s2">"line"</span><span class="p">)</span>
+  <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">duration</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">ease</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">easeLinear</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"start"</span><span class="p">,</span> <span class="nx">tick</span><span class="p">);</span>
+</code></pre></div></div>
+<p>These few lines of code are doing a good amount of work. The first <code class="highlighter-rouge">append</code> appends the clip path, which we defined earlier (the one we have an id of ‘clip’ to). The next <code class="highlighter-rouge">append</code> adds a path which uses that line function we defined earlier to calculate the values for the path. And finally, we have a transition which calls the <code class="highlighter-rouge">tick</code> function. This is responsible for the animation that we see. So what’s the <code class="highlighter-rouge">tick</code> function?</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">tick</span><span class="p">()</span> <span class="p">{</span>
+
+  <span class="c1">// Push a new data point onto the back.</span>
+  <span class="nx">data</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">random</span><span class="p">());</span>
+
+  <span class="c1">// Redraw the line.</span>
+  <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="nx">line</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"transform"</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+
+  <span class="c1">// Slide it to the left.</span>
+  <span class="nx">d3</span><span class="p">.</span><span class="nx">active</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"transform"</span><span class="p">,</span> <span class="s2">"translate("</span> <span class="o">+</span> <span class="nx">x</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s2">",0)"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+      <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"start"</span><span class="p">,</span> <span class="nx">tick</span><span class="p">);</span>
+
+  <span class="c1">// Pop the old data point off the front.</span>
+  <span class="nx">data</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This bit of code is well commented already. Basically for each tick, which you can think of like a time step, we will:</p>
+<ul>
+  <li>Add a new value to the data array</li>
+  <li>Redraw the line so the new value is included</li>
+  <li>Slide the line to the left to make the animated look</li>
+  <li>Remove the oldest data point</li>
+</ul>
+
+<p>And that’s a quick explanation of what we start with! If you run your http-server at this time, you should see something like <a href="https://bl.ocks.org/mbostock/raw/1642989/">this</a>. Time to start adding our own code and get to the exciting parts!</p>
+
+<h2 id="adding-in-websockets">Adding in websockets</h2>
+<p>The first thing we need to do is to make a connection to a websocket. A lot of this websocket code is taken from the Echo test linked above. We’ll also need to refer to the GDAX documentation for how to connect to their websocket. According to the documentation, we just need to make the connection, then send a subscribe message for exactly what we want to receive messages about. Let’s add some JavaScript, right after the script tags start.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+<span class="c1">// the URL to gdax's websocket feed</span>
+<span class="kd">var</span> <span class="nx">wsUri</span> <span class="o">=</span> <span class="s2">"wss://ws-feed.gdax.com"</span><span class="p">;</span>
+
+<span class="c1">// the subscription message to tell the websocket what kind of data we are interested in</span>
+<span class="kd">var</span> <span class="nx">subscribe</span> <span class="o">=</span> <span class="s1">'{"type": "subscribe","product_ids": ["ETH-USD"],"channels": [{"name": "ticker","product_ids": ["ETH-USD"]}]}'</span><span class="p">;</span>
+</code></pre></div></div>
+<p>Cool! We now have two variables, one for the connection URI, and one for our subscription message, a JSON string which in this case says I want the ticker channel for Ethereum. Now how do we actually connect? This is where we will borrow some code from the echo test.</p>
+
+<p>Let’s make a function called <code class="highlighter-rouge">initializeWebSocket()</code> and call it.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">initializeWebSocket</span><span class="p">();</span>
+
+<span class="cm">/**
+* Function that creates a WebSocket object and assigns handlers.
+* Adapted from https://websocket.org/echo.html
+*/</span>
+<span class="kd">function</span> <span class="nx">initializeWebSocket</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">websocket</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocket</span><span class="p">(</span><span class="nx">wsUri</span><span class="p">);</span>
+  <span class="nx">websocket</span><span class="p">.</span><span class="nx">onopen</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span> <span class="nx">onOpen</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">};</span>
+  <span class="nx">websocket</span><span class="p">.</span><span class="nx">onclose</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span> <span class="nx">onClose</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">};</span>
+  <span class="nx">websocket</span><span class="p">.</span><span class="nx">onmessage</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span> <span class="nx">onMessage</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">};</span>
+  <span class="nx">websocket</span><span class="p">.</span><span class="nx">onerror</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span> <span class="nx">onError</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The first line in our <code class="highlighter-rouge">initializeWebSocket()</code> function creates a websocket object and passes in the URI we just pointed to GDAX. The rest assign functions to each of the major websocket functionalities– opening, closing, getting a message, and getting an error. We are assigning those functionalities to our own functions, so now we have to go and define those.</p>
+
+<p>Right under our <code class="highlighter-rouge">initializeWebSocket()</code> function, add:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">onOpen</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"connected to websocket!"</span><span class="p">);</span>
+  <span class="c1">// send the subscription message</span>
+  <span class="nx">websocket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">subscribe</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">onMessage</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// print out the message data</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">onClose</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'disconnected'</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">onError</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'error: '</span><span class="p">,</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>And there are our four functions! We will add more to both the <code class="highlighter-rouge">onOpen()</code> and the <code class="highlighter-rouge">onMessage()</code> handlers, but for now, we’ll just suffice with some log statements so that we know things are working.</p>
+
+<p>At this point, you can refresh your page if you left your server running, and open up the Developer Tools on your browser to see the console. You should see the message “connected to websocket!” as the first output, then you will start seeing more console outputs as messages are received. Excellent– we’ve connected to the websocket! To disconnect from it, in the console, type <code class="highlighter-rouge">websocket.close()</code>. You should get a console output back that says ‘disconnected’. It’s good practice to close the websocket– eventually we will make the code do this for us. Otherwise, your server might be stuck running even when you think you’ve shut it down!</p>
+
+<h2 id="adapting-the-d3-code">Adapting the D3 code</h2>
+<p>Alright, time to start making the D3 code work for our data. Let’s change this line of code:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">n</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+    <span class="nx">random</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">randomNormal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">.</span><span class="mi">2</span><span class="p">),</span>
+    <span class="nx">data</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">range</span><span class="p">(</span><span class="nx">n</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="nx">random</span><span class="p">);</span>
+</code></pre></div></div>
+<p>To:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">n</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+    <span class="nx">data</span> <span class="o">=</span> <span class="p">[];</span>
+</code></pre></div></div>
+<p>We’ll keep <code class="highlighter-rouge">n</code> at 40 and get rid of any initial data by making it an empty array. This means, unlike the Spline Transition example, the graph will start off empty, and gradually fill up before starting to transition.</p>
+
+<p>After this, the next bit of code we are going to change is this one, where we set the y domain:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">scaleLinear</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">domain</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="p">.</span><span class="nx">range</span><span class="p">([</span><span class="nx">height</span><span class="p">,</span> <span class="mi">0</span><span class="p">]);</span>
+</code></pre></div></div>
+<p>Many wallets would cry if the value of Ethereum were between -1 and 1, so we are going to have to change that to something more accurate for Ethereum. We will make this dynamic later, but for current testing, let’s change it to the current price of Ethereum, plus or minus 5. For example, when first writing this code, this domain was enough for me to see the graph show up:</p>
+
+<p>In order to figure out what that domain should be, take a look at the console output for when you first start getting transaction listings. Look for the ‘price’ attribute, then add and subtract 5 to get your range. For example, at the time of this writing, my console outputs:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"ticker"</span><span class="p">,</span><span class="s2">"sequence"</span><span class="p">:</span><span class="mi">2616782160</span><span class="p">,</span><span class="s2">"product_id"</span><span class="p">:</span><span class="s2">"ETH-USD"</span><span class="p">,</span><span class="s2">"price"</span><span class="p">:</span><span class="s2">"943.69000000"</span><span class="p">,</span><span class="s2">"open_24h"</span><span class="p">:</span><span class="s2">"963.01000000"</span><span class="p">,</span><span class="s2">"volume_24h"</span><span class="p">:</span><span class="s2">"100157.36096518"</span><span class="p">,</span><span class="s2">"low_24h"</span><span class="p">:</span><span class="s2">"943.69000000"</span><span class="p">,</span><span class="s2">"high_24h"</span><span class="p">:</span><span class="s2">"982.99000000"</span><span class="p">,</span><span class="s2">"volume_30d"</span><span class="p">:</span><span class="s2">"6546933.68083798"</span><span class="p">,</span><span class="s2">"best_bid"</span><span class="p">:</span><span class="s2">"943.41"</span><span class="p">,</span><span class="s2">"best_ask"</span><span class="p">:</span><span class="s2">"943.69"</span><span class="p">,</span><span class="s2">"side"</span><span class="p">:</span><span class="s2">"buy"</span><span class="p">,</span><span class="s2">"time"</span><span class="p">:</span><span class="s2">"2018-02-18T20:05:42.919000Z"</span><span class="p">,</span><span class="s2">"trade_id"</span><span class="p">:</span><span class="mi">29401592</span><span class="p">,</span><span class="s2">"last_size"</span><span class="p">:</span><span class="s2">"1.79250000"</span><span class="p">}</span>
+</code></pre></div></div>
+<p>Since the price here is listed as 943.69, my code would be:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">scaleLinear</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">domain</span><span class="p">([</span><span class="mi">938</span><span class="p">,</span> <span class="mi">948</span><span class="p">])</span>
+    <span class="p">.</span><span class="nx">range</span><span class="p">([</span><span class="nx">height</span><span class="p">,</span> <span class="mi">0</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<p>This may not catch all of the points you see, but it should be good enough to see a line getting drawn soon.</p>
+
+<p>Finally, let’s change this line that sets where the x axis is:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="s2">"axis axis--x"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"transform"</span><span class="p">,</span> <span class="s2">"translate(0,"</span> <span class="o">+</span> <span class="nx">y</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s2">")"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">axisBottom</span><span class="p">(</span><span class="nx">x</span><span class="p">));</span>
+</code></pre></div></div>
+<p>To:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="s2">"axis axis--x"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"transform"</span><span class="p">,</span> <span class="s2">"translate(0,"</span> <span class="o">+</span> <span class="nx">height</span> <span class="o">+</span> <span class="s2">")"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">axisBottom</span><span class="p">(</span><span class="nx">x</span><span class="p">));</span>
+</code></pre></div></div>
+<p>Rather can set the x axis for wherever the value 0 would be, we will just set it equal to the height of the SVG so that the x axis is always at the bottom. At this point, if we were to look at our web page, we would see a blank chart with only a x and y axis. The y axis should be hard coded to be near Ethereum’s current prices, while the x axis is the same as in our original code, but moved to the bottom. If we open the console, then we can see messages coming in. Let’s get those messages to show up on the graph now!</p>
+
+<p>We’ll start by modifying the <code class="highlighter-rouge">onMessage()</code> function to:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">onMessage</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// print out the message data</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+
+  <span class="c1">// parse JSON response</span>
+  <span class="kd">var</span> <span class="nx">point</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+
+  <span class="c1">// don't do anything if this isn't a 'ticker' message with transaction data</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">point</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'ticker'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// add this point to the data array</span>
+  <span class="nx">data</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="o">+</span><span class="nx">point</span><span class="p">[</span><span class="s1">'price'</span><span class="p">]);</span>
+
+  <span class="c1">// redraw the line when new data gets added</span>
+  <span class="nx">redrawLine</span><span class="p">();</span>
+
+  <span class="c1">// if we have too much data, start the animation to move the line out of view</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s1">'.line'</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+      <span class="p">.</span><span class="nx">duration</span><span class="p">(</span><span class="mi">2000</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">ease</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">easeLinear</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"start"</span><span class="p">,</span> <span class="nx">tick</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>Now when we receive the message, we:</p>
+<ul>
+  <li>Print to the console the message we got. We’ll keep this around for debugging.</li>
+  <li>Convert the string response from GDAX to a JSON object for easy parsing</li>
+  <li>Check to make sure the message we received is transaction data (since we send the subscription message, we want to ignore that and any other messages that might come in that don’t have transaction data)</li>
+  <li>Add the point to the data array. Part of this is converting the string to a float through the use of <code class="highlighter-rouge">+</code></li>
+  <li>Redraw the line. We still need to define this function.</li>
+  <li>Check to see if our data array is too large (greater than our previously defined <code class="highlighter-rouge">n</code>). If it is, then tell the line to start its animation, in this case, by calling the function <code class="highlighter-rouge">tick()</code>. This bit of code is pretty much a copy of the original code that called <code class="highlighter-rouge">tick()</code>. In the original code, we wanted to start transitioning right away since we started with data. But in this code, since we start empty, we don’t want the transition to start until after we are overfilling.</li>
+</ul>
+
+<p>Because we told our line to start moving when we have more than <code class="highlighter-rouge">n</code> points, we don’t need that bit of code that starts it off anymore. In this bit of code:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"clip-path"</span><span class="p">,</span> <span class="s2">"url(#clip)"</span><span class="p">)</span>
+  <span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"path"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="s2">"line"</span><span class="p">)</span>
+  <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">duration</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">ease</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">easeLinear</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"start"</span><span class="p">,</span> <span class="nx">tick</span><span class="p">);</span>
+</code></pre></div></div>
+<p>Remove everything from <code class="highlighter-rouge">.transition()</code> on so that it looks like:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"clip-path"</span><span class="p">,</span> <span class="s2">"url(#clip)"</span><span class="p">)</span>
+  <span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"path"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="s2">"line"</span><span class="p">)</span>
+</code></pre></div></div>
+<p>Now let’s make the function for redrawing the line when data gets updated. Add anywhere in your code:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">redrawLine</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s1">'.line'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">'d'</span><span class="p">,</span> <span class="nx">line</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">'transform'</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>This, too, is a copy of the original code inside <code class="highlighter-rouge">tick()</code>, under the “Redraw the line.” comment. We’ll factor it out into its own function so that both our <code class="highlighter-rouge">onMessage()</code> and our <code class="highlighter-rouge">tick()</code> functions can call it. Let’s look at that <code class="highlighter-rouge">tick()</code> function now, and change it to:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">tick</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// Redraw the Line.</span>
+  <span class="nx">redrawLine</span><span class="p">();</span>
+
+  <span class="c1">// Slide it to the left.</span>
+  <span class="nx">d3</span><span class="p">.</span><span class="nx">active</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"transform"</span><span class="p">,</span> <span class="s2">"translate("</span> <span class="o">+</span> <span class="nx">x</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s2">",0)"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+      <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"start"</span><span class="p">,</span> <span class="nx">tick</span><span class="p">);</span>
+
+  <span class="c1">// Pop the old data point off the front.</span>
+  <span class="nx">data</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+
+<span class="p">}</span>
+</code></pre></div></div>
+<p>We got rid of pushing data into the data array since our <code class="highlighter-rouge">onMessage()</code> function does that, and we changed the bit of code that redrew the line to be a function. Other than that, the <code class="highlighter-rouge">tick()</code> function is the same for now. Let’s see what our page looks like now!</p>
+
+<p>When you refresh, you should still see a blank chart, with just the axes. Your console should log that the websocket connection was made, and then it’s just a matter of waiting for points to come in. Because our x scale was set to start at 1, and it takes two points to make a line, we actually won’t see a line until there are at least 3 points inside our <code class="highlighter-rouge">data</code> array. You can type <code class="highlighter-rouge">data</code> into the console to see how many values are in there. You may also need to make sure that the values in <code class="highlighter-rouge">data</code> are still within that range we hard coded in for our y scale earlier.</p>
+
+<p>You should now see the graph begin to draw itself across the screen in real time! If you keep waiting, once the <code class="highlighter-rouge">data</code> array gets more than 40 values, the graph will start transitioning, just like in the Spline Transition example, by scrolling off the screen.</p>
+
+<p>And that’s the basic idea for integrating websockets with D3! There are still some things that could be changed, for example:</p>
+<ul>
+  <li>If data does not come in quickly enough, the animation will win out and we will be left with a blank graph again</li>
+  <li>Could use some text to tell the user what is happening</li>
+  <li>It’d be nice to automatically close the websocket after a certain amount of time</li>
+  <li>Hard coded y domains. No one likes hard coded values!
+    <ul>
+      <li>Related: because domain is hard coded, values can go off the graph</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="enhancements">Enhancements</h2>
+<h3 id="avoiding-the-blank-graph">Avoiding the blank graph</h3>
+<p>This problem comes because the graph starts animating moving out of the graph and popping data off as a time step. If this time step happens to be faster than the rate that data is coming in, you can end up with a blank graph. You could get rid of animation all together and simply have the <code class="highlighter-rouge">tick()</code> function called each time data comes in, but then you lose the sliding animation. I personally like it, so to counter this problem, I add to the beginning of the <code class="highlighter-rouge">tick()</code> function:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">tick</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// Don't tick if we are short on data points</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="nx">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+   	<span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Redraw the Line</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>This just returns from the <code class="highlighter-rouge">tick()</code> function if we don’t have enough data. You can compare <code class="highlighter-rouge">data.length</code> to anything less than <code class="highlighter-rouge">n</code>, depending on how you want your graph to look. Using <code class="highlighter-rouge">n-2</code> always makes the graph look full since that’s our domain, but you could have it at <code class="highlighter-rouge">n/2</code> for instance, if you want the graph to stop sliding when the are only 20 transactions in the <code class="highlighter-rouge">data</code> array (this will make the graph fill up, then slide over to halfway along the x axis, then stop sliding until the graph is full again, then start sliding again).</p>
+
+<h3 id="adding-text-for-the-user">Adding text for the user</h3>
+<p>Because it may take a while for there to be enough transactions to start drawing the graph, we want to keep the user up to date on what is happening so they aren’t just looking at a blank graph. We’ll add a paragraph to our HTML where we can put text for the user to read.</p>
+
+<p>At the beginning of the code, change:</p>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;/style&gt;</span>
+<span class="nt">&lt;svg</span> <span class="na">width=</span><span class="s">"960"</span> <span class="na">height=</span><span class="s">"500"</span><span class="nt">&gt;&lt;/svg&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"//d3js.org/d3.v4.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script&gt;</span>
+</code></pre></div></div>
+<p>to add the paragraph element:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;/style&gt;</span>
+<span class="nt">&lt;p</span> <span class="na">id=</span><span class="s">"info"</span><span class="nt">&gt;</span> <span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;svg</span> <span class="na">width=</span><span class="s">"960"</span> <span class="na">height=</span><span class="s">"500"</span><span class="nt">&gt;&lt;/svg&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"//d3js.org/d3.v4.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script&gt;</span>
+</code></pre></div></div>
+<p>Great, now we have somewhere to write out text to. Let’s start by modifying the <code class="highlighter-rouge">onOpen()</code> function. Instead of using the console log, we will write text to the <code class="highlighter-rouge">p</code> element we just made:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">onOpen</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s1">'#info'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">text</span><span class="p">(</span><span class="s1">'Connected to the websocket! Waiting for transactions...'</span><span class="p">);</span>
+  <span class="c1">// send the subscription message</span>
+  <span class="nx">websocket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">subscribe</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now we want to change the text when we do get a transaction. Once again, as explained above, we won’t actually be able to graph anything until we have at least 3 points in our <code class="highlighter-rouge">data</code> array. So we need to add a <code class="highlighter-rouge">count</code> variable that counts how many points we have seen so that we can alter our text.</p>
+
+<p>At the top of the JavaScript, after defining the subscription message, add:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Then, at the top of our <code class="highlighter-rouge">onMessage()</code> function, add:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">onMessage</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// increment counter</span>
+  <span class="nx">count</span><span class="o">++</span><span class="p">;</span>
+
+  <span class="c1">// parse JSON response</span>
+  <span class="p">...</span>
+  <span class="c1">// don't do anything if this isn't a 'ticker' message with transaction data</span>
+  <span class="p">...</span>
+
+  <span class="c1">// add this point to the data array</span>
+  <span class="p">...</span>
+
+  <span class="c1">// check for enough transactions</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">count</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="err">#</span><span class="nx">info</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">text</span><span class="p">(</span><span class="s2">"Real time visualization of Ethereum prices"</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// redraw the line when new data gets added</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now if you refresh your page, you should see the message about waiting for a transaction up until the graph starts being drawn. Then, you’ll see the real title of the graph, as well as the beginning of your line graph.</p>
+
+<h3 id="automatically-close-the-websocket">Automatically close the websocket</h3>
+<p>Let’s say we want the code to close the websocket after monitoring the market for five minutes. I did this in order to host the code on bl.ocks without it constantly being connected to the GDAX servers. After calling the <code class="highlighter-rouge">initializeWebsocket()</code> function, add to your code:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// automatically close the web socket after five minutes</span>
+<span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+  <span class="nx">websocket</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+  <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s1">'#info'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">text</span><span class="p">(</span><span class="s2">"Websocket automatically disconnected after five minutes."</span><span class="p">);</span>
+<span class="p">},</span> <span class="mi">5</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">1000</span><span class="p">);</span>
+</code></pre></div></div>
+<p>This will also tell the user that the websocket was automatically disconnected.</p>
+
+<h3 id="automatically-adjust-y-domain">Automatically adjust y domain</h3>
+<p>Alright, it’s high time we got rid of those hard coded values! First, we’ll delete that line. Change:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">scaleLinear</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">domain</span><span class="p">([</span><span class="mi">938</span><span class="p">,</span> <span class="mi">948</span><span class="p">])</span>
+    <span class="p">.</span><span class="nx">range</span><span class="p">([</span><span class="nx">height</span><span class="p">,</span> <span class="mi">0</span><span class="p">]);</span>
+</code></pre></div></div>
+<p>to:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">scaleLinear</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">range</span><span class="p">([</span><span class="nx">height</span><span class="p">,</span> <span class="mi">0</span><span class="p">]);</span>
+</code></pre></div></div>
+<p>Now we need a way to set the domain of the y scale. We won’t know what our domain should be until our first messages comes in. So let’s add another variable to the beginning of our code called <code class="highlighter-rouge">firstMessageReceived</code>, and set it equal to <code class="highlighter-rouge">false</code>. To determine our y domain, we will use this first message as our <code class="highlighter-rouge">center</code> point. Then, we will simply expand the y domain plus or minus <code class="highlighter-rouge">sigma</code>. Lastly, we will also want a <code class="highlighter-rouge">buffer</code> variable so that our line doesn’t end up right at the edge of our graph.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// the URL to gdax's websocket feed</span>
+<span class="p">...</span>
+<span class="c1">// the subscription message to tell the websocket what kind of data we are interested in</span>
+<span class="p">...</span>
+<span class="kd">var</span> <span class="nx">firstMessageReceived</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+<span class="c1">// keep track of the 'center' point for the y axis</span>
+<span class="kd">var</span> <span class="nx">center</span><span class="p">;</span>
+<span class="c1">// how much data we want to display around the center point</span>
+<span class="kd">var</span> <span class="nx">sigma</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span>
+<span class="c1">// buffer for y axis</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
+
+<span class="c1">// initialize web socket</span>
+<span class="p">...</span>
+</code></pre></div></div>
+<p>We are going to make our <code class="highlighter-rouge">onMessage()</code> function do the hard work.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">onMessage</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// increment counter</span>
+  <span class="p">...</span>
+  <span class="c1">// parse JSON response</span>
+  <span class="p">...</span>
+  <span class="c1">// don't do anything if this isn't a 'ticker' message with transaction data</span>
+  <span class="p">...</span>
+
+  <span class="c1">// add this point to the data array</span>
+  <span class="p">...</span>
+
+  <span class="c1">// record when the first message is received so we can draw an initial y axis</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">firstMessageReceived</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">firstMessageReceived</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="nx">center</span> <span class="o">=</span> <span class="o">+</span><span class="nx">point</span><span class="p">[</span><span class="s1">'price'</span><span class="p">];</span>
+    <span class="nx">drawYAxis</span><span class="p">(</span><span class="nx">center</span><span class="o">-</span><span class="nx">sigma</span><span class="p">,</span> <span class="nx">center</span><span class="o">+</span><span class="nx">sigma</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// check for enough transactions</span>
+  <span class="p">...</span>
+
+  <span class="c1">// code to expand the y domain if the data goes out of the current bounds</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">+</span><span class="nx">point</span><span class="p">[</span><span class="s1">'price'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nx">center</span><span class="o">+</span><span class="nx">sigma</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">sigma</span><span class="o">+=</span> <span class="o">+</span><span class="nx">point</span><span class="p">[</span><span class="s1">'price'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="nx">center</span><span class="o">+</span><span class="nx">sigma</span><span class="p">)</span> <span class="o">+</span> <span class="nx">buffer</span><span class="p">;</span>
+    <span class="nx">drawYAxis</span><span class="p">(</span><span class="nx">center</span><span class="o">-</span><span class="nx">sigma</span><span class="p">,</span> <span class="nx">center</span><span class="o">+</span><span class="nx">sigma</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">+</span><span class="nx">point</span><span class="p">[</span><span class="s1">'price'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nx">center</span><span class="o">-</span><span class="nx">sigma</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">sigma</span><span class="o">+=</span> <span class="p">(</span><span class="nx">center</span><span class="o">-</span><span class="nx">sigma</span><span class="p">)</span> <span class="o">-</span> <span class="o">+</span><span class="nx">point</span><span class="p">[</span><span class="s1">'price'</span><span class="p">]</span> <span class="o">+</span> <span class="nx">buffer</span><span class="p">;</span>
+    <span class="nx">drawYAxis</span><span class="p">(</span><span class="nx">center</span><span class="o">-</span><span class="nx">sigma</span><span class="p">,</span> <span class="nx">center</span><span class="o">+</span><span class="nx">sigma</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// redraw the line when new data gets added</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>Two chunks of code were added in this section. The first chunk sets the variable <code class="highlighter-rouge">center</code> to the value of the first transaction. Then it calls a yet to be defined function called <code class="highlighter-rouge">drawYAxis()</code> which takes a low and a high value, in this case, <code class="highlighter-rouge">center</code> plus or minus <code class="highlighter-rouge">sigma</code>.</p>
+
+<p>The next chunk of code is to see if our y domain needs to expand in the case that we get new transactions that are outside our sigma range. So we check to see if the new data point is above or below our range, and if it is, then we expand sigma by the difference plus the buffer. Then call the <code class="highlighter-rouge">drawYAxis()</code> function on this new sigma.</p>
+
+<p>Time to define this <code class="highlighter-rouge">drawYAxis()</code> function! Anywhere in your JavaScript, add:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+* Function to draw the axes
+*/</span>
+<span class="kd">function</span> <span class="nx">drawYAxis</span><span class="p">(</span><span class="nx">low</span><span class="p">,</span> <span class="nx">high</span><span class="p">)</span> <span class="p">{</span>
+ <span class="c1">// set the y domain</span>
+ <span class="nx">y</span><span class="p">.</span><span class="nx">domain</span><span class="p">([</span><span class="nx">low</span><span class="p">,</span> <span class="nx">high</span><span class="p">])</span>
+
+ <span class="c1">// set y axis</span>
+ <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s1">'.axis--y'</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">axisLeft</span><span class="p">(</span><span class="nx">y</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>With this new function, we can get rid of the bit of code that originaly called the axis. Change:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="s2">"axis axis--y"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">axisLeft</span><span class="p">(</span><span class="nx">y</span><span class="p">));</span>
+</code></pre></div></div>
+<p>to just:</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">g</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+ <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="s2">"axis axis--y"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>And that’s it! Refresh the page, and watch your y axis adjust to incoming transactions!</p>
+
+<h2 id="conclusion">Conclusion</h2>
+<p>This is a quick example for how you can use D3 with websockets in order to make real time visualizations. I chose GDAX since they have an easily accessible public websocket API, but you could imagine rolling your own websocket server to serve up data that is more relevant to your project. Have fun!</p>
+
+  </div><a class="u-url" href="/2018/02/19/D3-with-websockets-tutorial.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Allison King</li><li><a class="u-email" href="mailto:allisonjuliaking@gmail.com">allisonjuliaking@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/allisonking"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">allisonking</span></a></li><li><a href="https://www.twitter.com/allisonjking"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">allisonjking</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Software Engineer | Reader | Writer</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
